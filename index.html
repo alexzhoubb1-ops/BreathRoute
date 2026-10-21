@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BreatheRoute - Air Pollution & Proximity Tool</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Leaflet CSS & JS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <!-- Turf.js for spatial calculations -->
+  <script src="https://unpkg.com/@turf/turf@6.5.0/turf.min.js"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    #map { height: calc(100vh - 65px); width: 100%; z-index: 1; }
+    .custom-scroll::-webkit-scrollbar { width: 6px; }
+    .custom-scroll::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 3px; }
+    .leaflet-popup-content-wrapper { border-radius: 8px; padding: 4px; }
+  </style>
+</head>
+<body class="bg-slate-50 font-sans text-slate-800 antialiased flex flex-col h-screen overflow-hidden">
+
+  <!-- Header / Navigation -->
+  <header class="bg-slate-900 text-white border-b border-slate-800 px-4 py-3 flex items-center justify-between z-10 shadow-md">
+    <div class="flex items-center space-x-3">
+      <div class="bg-teal-500 p-2 rounded-lg text-slate-900 font-bold">
+        <i data-lucide="wind" class="w-6 h-6"></i>
+      </div>
+      <div>
+        <h1 class="text-xl font-bold tracking-tight text-white flex items-center gap-2">
+          BreatheRoute <span class="text-xs bg-teal-500/20 text-teal-300 font-mono px-2 py-0.5 rounded border border-teal-500/30">CA-16 101 Corridor</span>
+        </h1>
+        <p class="text-xs text-slate-400" id="header-subtitle">Air pollution exposure map for schools & homes</p>
+      </div>
+    </div>
+
+    <!-- Right Actions -->
+    <div class="flex items-center space-x-3">
+      <!-- Language Toggle Button -->
+      <button id="lang-toggle" onclick="toggleLanguage()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 px-3 py-1.5 rounded-lg text-sm font-medium transition flex items-center gap-2">
+        <i data-lucide="languages" class="w-4 h-4 text-teal-400"></i>
+        <span id="lang-text">Español</span>
+      </button>
+
+      <!-- Dev Log Modal Trigger -->
+      <button onclick="toggleModal('devlog-modal')" class="bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 p-2 rounded-lg text-sm transition" title="Developer Log & Submission Specs">
+        <i data-lucide="file-text" class="w-5 h-5"></i>
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <div class="flex-1 flex flex-col md:flex-row relative overflow-hidden">
+
+    <!-- Sidebar Controls & Data -->
+    <div class="w-full md:w-96 bg-white border-r border-slate-200 flex flex-col z-10 shadow-lg h-1/2 md:h-full">
+      
+      <!-- Address Lookup -->
+      <div class="p-4 border-b border-slate-200 bg-slate-50">
+        <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2" id="lbl-address">
+          Check Address or School Proximity
+        </label>
+        <div class="space-y-2">
+          <div class="relative">
+            <input type="text" id="address-input" placeholder="e.g., 1500 East Palo Alto Way" class="w-full bg-white border border-slate-300 rounded-lg pl-9 pr-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500">
+            <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3 top-2.5"></i>
+          </div>
+          <div class="flex gap-2">
+            <button onclick="searchAddress()" class="flex-1 bg-teal-600 hover:bg-teal-700 text-white text-sm font-medium py-2 px-3 rounded-lg transition shadow-sm flex items-center justify-center gap-1.5">
+              <i data-lucide="map-pin" class="w-4 h-4"></i>
+              <span id="btn-check">Check Proximity</span>
+            </button>
+            <button onclick="resetSearch()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 text-sm font-medium py-2 px-3 rounded-lg transition" id="btn-reset">
+              Reset
+            </button>
+          </div>
+        </div>
+
+        <!-- Result Card -->
+        <div id="search-result" class="mt-3 p-3 rounded-lg text-xs hidden border"></div>
+      </div>
+
+      <!-- Navigation Tabs -->
+      <div class="flex border-b border-slate-200 bg-white">
+        <button onclick="switchTab('ranking')" id="tab-ranking" class="flex-1 py-2.5 text-xs font-semibold border-b-2 border-teal-600 text-teal-700 flex items-center justify-center gap-1">
+          <i data-lucide="list-ordered" class="w-4 h-4"></i>
+          <span id="tab-label-ranking">School Ranking</span>
+        </button>
+        <button onclick="switchTab('guidance')" id="tab-guidance" class="flex-1 py-2.5 text-xs font-semibold border-b-2 border-transparent text-slate-500 hover:text-slate-700 flex items-center justify-center gap-1">
+          <i data-lucide="shield-alert" class="w-4 h-4"></i>
+          <span id="tab-label-guidance">What You Can Do</span>
+        </button>
+      </div>
+
+      <!-- Tab Content Area -->
+      <div class="flex-1 overflow-y-auto custom-scroll p-4 space-y-4">
+
+        <!-- TAB 1: School Rankings -->
+        <div id="content-ranking" class="space-y-3">
+          <div class="flex items-center justify-between text-xs text-slate-500 pb-1">
+            <span id="ranking-subtitle">CA-16 Public Schools (Sorted by US 101 Proximity)</span>
+            <span class="font-mono bg-slate-100 px-1.5 py-0.5 rounded text-slate-600" id="school-count">0 Schools</span>
+          </div>
+
+          <!-- Legend -->
+          <div class="grid grid-cols-2 gap-2 text-xs p-2 bg-slate-50 rounded-lg border border-slate-200">
+            <div class="flex items-center gap-1.5">
+              <span class="w-3 h-3 rounded-full bg-red-500 inline-block"></span>
+              <span id="leg-danger">&lt; 500 ft (High Pollution Zone)</span>
+            </div>
+            <div class="flex items-center gap-1.5">
+              <span class="w-3 h-3 rounded-full bg-amber-500 inline-block"></span>
+              <span>500 - 1,000 ft</span>
+            </div>
+            <div class="flex items-center gap-1.5">
+              <span class="w-3 h-3 rounded-full bg-emerald-500 inline-block"></span>
+              <span>&gt; 1,000 ft</span>
+            </div>
+            <div class="flex items-center gap-1.5">
+              <span class="w-4 h-1.5 bg-red-400 opacity-60 inline-block rounded"></span>
+              <span id="leg-buffer">500 ft Buffer Zone</span>
+            </div>
+          </div>
+
+          <!-- School Cards List -->
+          <div id="schools-list" class="space-y-2"></div>
+        </div>
+
+        <!-- TAB 2: Action Guidance -->
+        <div id="content-guidance" class="hidden space-y-4 text-xs">
+          <!-- Critical Doctor Notice -->
+          <div class="p-3 bg-red-50 border-l-4 border-red-500 rounded text-red-900 font-medium space-y-1">
+            <div class="flex items-center gap-1.5 font-bold text-red-800">
+              <i data-lucide="alert-triangle" class="w-4 h-4 text-red-600"></i>
+              <span id="guidance-alert-title">Important Health Notice</span>
+            </div>
+            <p id="guidance-asthma-notice">If your child has asthma, follow the asthma action plan from your doctor.</p>
+          </div>
+
+          <div class="space-y-3">
+            <h3 class="font-bold text-slate-800 text-sm border-b pb-1" id="guidance-heading">Official Guidance & Recommended Actions</h3>
+            
+            <div class="p-3 bg-slate-50 rounded-lg border border-slate-200 space-y-1.5">
+              <div class="font-semibold text-slate-700 flex items-center gap-1.5">
+                <i data-lucide="filter" class="w-4 h-4 text-teal-600"></i>
+                <span id="guide1-title">Indoor Air Filtration</span>
+              </div>
+              <p class="text-slate-600" id="guide1-body">Use MERV 13+ rated HVAC filters or portable HEPA air purifiers in bedrooms and classrooms facing major roadways.</p>
+              <a href="https://www.arb.ca.gov/research/indoor/aircleaners/certified.htm" target="_blank" class="text-teal-600 hover:underline inline-flex items-center gap-1 font-medium">
+                CARB Air Cleaner Certification <i data-lucide="external-link" class="w-3 h-3"></i>
+              </a>
+            </div>
+
+            <div class="p-3 bg-slate-50 rounded-lg border border-slate-200 space-y-1.5">
+              <div class="font-semibold text-slate-700 flex items-center gap-1.5">
+                <i data-lucide="clock" class="w-4 h-4 text-teal-600"></i>
+                <span id="guide2-title">Peak Recess Scheduling</span>
+              </div>
+              <p class="text-slate-600" id="guide2-body">Schedule outdoor activities outside of peak commute hours (7-9 AM, 4-6 PM) when freeway particulate levels spike.</p>
+              <a href="https://www.baaqmd.gov/" target="_blank" class="text-teal-600 hover:underline inline-flex items-center gap-1 font-medium">
+                Bay Area Air Quality Management District (BAAQMD) <i data-lucide="external-link" class="w-3 h-3"></i>
+              </a>
+            </div>
+
+            <div class="p-3 bg-slate-50 rounded-lg border border-slate-200 space-y-1.5">
+              <div class="font-semibold text-slate-700 flex items-center gap-1.5">
+                <i data-lucide="cloud-sun" class="w-4 h-4 text-teal-600"></i>
+                <span id="guide3-title">Spare the Air Alerts</span>
+              </div>
+              <p class="text-slate-600" id="guide3-body">Monitor real-time Air Quality Index (AQI) alerts and limit outdoor exertion on Spare the Air days.</p>
+              <a href="https://www.sparetheair.org/" target="_blank" class="text-teal-600 hover:underline inline-flex items-center gap-1 font-medium">
+                Spare the Air Notifications <i data-lucide="external-link" class="w-3 h-3"></i>
+              </a>
+            </div>
+
+            <div class="p-3 bg-slate-50 rounded-lg border border-slate-200 space-y-1.5">
+              <div class="font-semibold text-slate-700 flex items-center gap-1.5">
+                <i data-lucide="book-open" class="w-4 h-4 text-teal-600"></i>
+                <span id="guide4-title">School Bus & Traffic Idle Policies</span>
+              </div>
+              <p class="text-slate-600" id="guide4-body">Enforce anti-idling zones during school pickup and dropoff to minimize localized exhaust concentration.</p>
+              <a href="https://www.epa.gov/schools" target="_blank" class="text-teal-600 hover:underline inline-flex items-center gap-1 font-medium">
+                US EPA Healthy School Environments <i data-lucide="external-link" class="w-3 h-3"></i>
+              </a>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Map View Area -->
+    <div class="flex-1 relative">
+      <div id="map"></div>
+
+      <!-- Floating Map Info Badge -->
+      <div class="absolute bottom-5 right-5 z-[500] bg-white/95 backdrop-blur-sm p-3 rounded-lg shadow-lg border border-slate-200 text-xs max-w-xs hidden sm:block">
+        <div class="font-bold text-slate-800 mb-1 flex items-center gap-1.5">
+          <i data-lucide="info" class="w-4 h-4 text-teal-600"></i>
+          <span id="badge-title">Highway 101 Disparity</span>
+        </div>
+        <p class="text-slate-600 leading-relaxed" id="badge-desc">
+          Palo Alto and East Palo Alto are separated by US 101, yet East Palo Alto experiences ~2.5x higher childhood asthma hospitalization rates due to freeway exhaust exposure and limited monitoring.
+        </p>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Modal: Dev Log & Submission Specs -->
+  <div id="devlog-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[85vh] flex flex-col overflow-hidden">
+      <div class="p-4 bg-slate-900 text-white flex justify-between items-center border-b border-slate-800">
+        <h2 class="font-bold text-lg flex items-center gap-2">
+          <i data-lucide="code" class="w-5 h-5 text-teal-400"></i>
+          Congressional App Challenge 2026 - Dev Log & Specs
+        </h2>
+        <button onclick="toggleModal('devlog-modal')" class="text-slate-400 hover:text-white">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+      <div class="p-6 overflow-y-auto space-y-4 text-xs leading-relaxed text-slate-700">
+        <div>
+          <h3 class="font-bold text-slate-900 text-sm mb-1">Target District & Positioning</h3>
+          <p><strong>District:</strong> CA-16 (Palo Alto, East Palo Alto, Mountain View, San Jose)</p>
+          <p><strong>Pitch:</strong> BreatheRoute is a bilingual web app helping families along Highway 101 see how close their school or home is to freeway pollution and access official health guidance.</p>
+        </div>
+
+        <div>
+          <h3 class="font-bold text-slate-900 text-sm mb-1">Technical Architecture & Stack</h3>
+          <ul class="list-disc pl-4 space-y-1">
+            <li><strong>Geospatial Calculations:</strong> GeoPandas / Turf.js projecting line-to-point buffer calculations (meter-based metric buffers converted to 500ft threshold).</li>
+            <li><strong>Data Sources:</strong> Caltrans GIS US-101 highway vector geometries & California Department of Education (CDE) Public Schools Dataset.</li>
+            <li><strong>Deployment:</strong> Streamlit Community Cloud (Python/GeoPandas production deployment repository) & Static web prototype preview.</li>
+          </ul>
+        </div>
+
+        <div>
+          <h3 class="font-bold text-slate-900 text-sm mb-1">Development Schedule</h3>
+          <div class="space-y-1 bg-slate-50 p-2.5 rounded border border-slate-200 font-mono text-[11px]">
+            <p><strong>Wed, Oct 21:</strong> District selection (CA-16), repo structure, data downloads (Caltrans + CDE directory).</p>
+            <p><strong>Thu, Oct 22:</strong> Geospatial clipping to CA-16 101 corridor, projected distance calculations, 500ft buffer zone vectoring.</p>
+            <p><strong>Fri, Oct 23:</strong> Streamlit interface, address proximity locator, school risk ranking algorithms.</p>
+            <p><strong>Sat, Oct 24:</strong> English/Spanish translation engine, EPA/CARB guidance links integration, user testing.</p>
+            <p><strong>Sun, Oct 25:</strong> Video recording (3-min pitch & live demo), submission documentation completion.</p>
+          </div>
+        </div>
+
+        <div>
+          <h3 class="font-bold text-slate-900 text-sm mb-1">Technical Challenge & Solution</h3>
+          <p><strong>Challenge:</strong> Inaccurate distance measuring using spherical Lat/Lng coordinates causing distortion around highway curves.</p>
+          <p><strong>Solution:</strong> Projected vector calculations using EPSG:3310 (California Albers) / Turf distance geodesics to compute exact perpendicular line distance to US-101 line segments.</p>
+        </div>
+      </div>
+      <div class="p-3 bg-slate-100 border-t flex justify-end">
+        <button onclick="toggleModal('devlog-modal')" class="bg-slate-800 text-white px-4 py-1.5 rounded text-xs font-medium hover:bg-slate-700">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // --- Translations Dictionary ---
+    const i18n = {
+      en: {
+        subtitle: "Air pollution exposure map for schools & homes",
+        lblAddress: "Check Address or School Proximity",
+        btnCheck: "Check Proximity",
+        btnReset: "Reset",
+        tabRanking: "School Ranking",
+        tabGuidance: "What You Can Do",
+        rankingSubtitle: "CA-16 Public Schools (Sorted by US 101 Proximity)",
+        legDanger: "< 500 ft (High Pollution Zone)",
+        legBuffer: "500 ft Buffer Zone",
+        alertTitle: "Important Health Notice",
+        asthmaNotice: "If your child has asthma, follow the asthma action plan from your doctor.",
+        guidanceHeading: "Official Guidance & Recommended Actions",
+        g1Title: "Indoor Air Filtration",
+        g1Body: "Use MERV 13+ rated HVAC filters or portable HEPA air purifiers in bedrooms and classrooms facing major roadways.",
+        g2Title: "Peak Recess Scheduling",
+        g2Body: "Schedule outdoor activities outside of peak commute hours (7-9 AM, 4-6 PM) when freeway particulate levels spike.",
+        g3Title: "Spare the Air Alerts",
+        g3Body: "Monitor real-time Air Quality Index (AQI) alerts and limit outdoor exertion on Spare the Air days.",
+        g4Title: "School Bus & Traffic Idle Policies",
+        g4Body: "Enforce anti-idling zones during school pickup and dropoff to minimize localized exhaust concentration.",
+        badgeTitle: "Highway 101 Disparity",
+        badgeDesc: "Palo Alto and East Palo Alto are separated by US 101, yet East Palo Alto experiences ~2.5x higher childhood asthma hospitalization rates due to freeway exhaust exposure and limited monitoring."
+      },
+      es: {
+        subtitle: "Mapa de exposición a la contaminación del aire para escuelas y hogares",
+        lblAddress: "Verificar Proximidad de Dirección o Escuela",
+        btnCheck: "Verificar Proximidad",
+        btnReset: "Restablecer",
+        tabRanking: "Clasificación de Escuelas",
+        tabGuidance: "Qué Puede Hacer",
+        rankingSubtitle: "Escuelas Públicas de CA-16 (Ordenadas por proximidad a la US 101)",
+        legDanger: "< 500 pies (Zona de Alta Exposición)",
+        legBuffer: "Zona de Amortiguamiento de 500 pies",
+        alertTitle: "Aviso de Salud Importante",
+        asthmaNotice: "Si su hijo tiene asma, siga el plan de acción contra el asma recomendado por su médico.",
+        guidanceHeading: "Orientación Oficial y Acciones Recomendadas",
+        g1Title: "Filtración del Aire Interior",
+        g1Body: "Utilice filtros HVAC con clasificación MERV 13+ o purificadores de aire HEPA portátiles en dormitorios y aulas con vista a vías principales.",
+        g2Title: "Programación de Recreos",
+        g2Body: "Programe actividades al aire libre fuera de las horas pico de tráfico (7-9 AM, 4-6 PM) cuando se disparan las partículas.",
+        g3Title: "Alertas Spare the Air",
+        g3Body: "Monitoree las alertas en tiempo real del Índice de Calidad del Aire (ICA) y limite el esfuerzo al aire libre en días de alerta.",
+        g4Title: "Políticas Anti-Ralentí en Autobuses",
+        g4Body: "Haga cumplir las zonas prohibidas para dejar motores encendidos durante la llegada y salida escolar.",
+        badgeTitle: "Disparidad de la Carretera 101",
+        badgeDesc: "Palo Alto y East Palo Alto están separados por la US 101, pero East Palo Alto experimenta tasas de hospitalización por asma infantil ~2.5 veces mayores debido a los gases de escape de la autopista y los pocos monitores de aire."
+      }
+    };
+
+    let currentLang = 'en';
+
+    // --- CA-16 US-101 Corridor School Dataset (CDE Sample Data) ---
+    const schoolsData = [
+      { id: 1, name: "Costaño Community School", city: "East Palo Alto", lat: 37.4648, lng: -122.1382, distFt: 320 },
+      { id: 2, name: "César Chávez Ravenswood Middle School", city: "East Palo Alto", lat: 37.4691, lng: -122.1325, distFt: 450 },
+      { id: 3, name: "Los Arboles Elementary School", city: "East Palo Alto", lat: 37.4612, lng: -122.1350, distFt: 480 },
+      { id: 4, name: "Greendell School", city: "Palo Alto", lat: 37.4225, lng: -122.1189, distFt: 620 },
+      { id: 5, name: "Stevenson Elementary School", city: "Mountain View", lat: 37.4089, lng: -122.0912, distFt: 410 },
+      { id: 6, name: "Duveneck Elementary School", city: "Palo Alto", lat: 37.4521, lng: -122.1332, distFt: 890 },
+      { id: 7, name: "Crittenden Middle School", city: "Mountain View", lat: 37.4124, lng: -122.0831, distFt: 1100 },
+      { id: 8, name: "Palo Alto High School", city: "Palo Alto", lat: 37.4367, lng: -122.1564, distFt: 1850 }
+    ];
+
+    // US-101 Polyline Coordinates (CA-16 Segment)
+    const us101Coords = [
+      [37.4800, -122.1500],
+      [37.4650, -122.1390],
+      [37.4500, -122.1280],
+      [37.4300, -122.1100],
+      [37.4100, -122.0850],
+      [37.3900, -121.9800]
+    ];
+
+    // --- Map Initialization ---
+    let map, us101Line, bufferPolygon, userMarker;
+    let schoolMarkers = [];
+
+    function initMap() {
+      map = L.map('map').setView([37.4500, -122.1200], 12);
+
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap contributors | Caltrans GIS | CDE'
+      }).addTo(map);
+
+      // Render US-101 Polyline
+      us101Line = L.polyline(us101Coords, {
+        color: '#dc2626',
+        weight: 6,
+        opacity: 0.95
+      }).addTo(map);
+
+      // Render 500ft Buffer Zone
+      const turfLine = turf.lineString(us101Coords.map(c => [c[1], c[0]]));
+      const buffered = turf.buffer(turfLine, 500 * 0.0003048, { units: 'kilometers' });
+
+      bufferPolygon = L.geoJSON(buffered, {
+        style: {
+          color: '#ef4444',
+          weight: 1,
+          fillColor: '#f87171',
+          fillOpacity: 0.25,
+          dashArray: '4,4'
+        }
+      }).addTo(map);
+
+      // Render School Markers
+      renderSchoolsOnMap();
+      renderSchoolList();
+      lucide.createIcons();
+    }
+
+    // --- Render School Pins on Map ---
+    function renderSchoolsOnMap() {
+      schoolsData.sort((a, b) => a.distFt - b.distFt);
+
+      schoolsData.forEach(school => {
+        let color = school.distFt < 500 ? '#ef4444' : (school.distFt < 1000 ? '#f59e0b' : '#10b981');
+        
+        const marker = L.circleMarker([school.lat, school.lng], {
+          radius: 8,
+          fillColor: color,
+          color: '#ffffff',
+          weight: 2,
+          fillOpacity: 0.9
+        }).addTo(map);
+
+        marker.bindPopup(`
+          <div class="text-xs p-1">
+            <div class="font-bold text-slate-900">${school.name}</div>
+            <div class="text-slate-500 mb-1">${school.city}</div>
+            <div class="font-semibold ${school.distFt < 500 ? 'text-red-600' : 'text-slate-700'}">
+              Distance to US 101: ${school.distFt} ft
+            </div>
+            ${school.distFt < 500 ? '<span class="inline-block mt-1 bg-red-100 text-red-800 px-1.5 py-0.5 rounded text-[10px] font-bold">Within 500ft Buffer Zone</span>' : ''}
+          </div>
+        `);
+
+        schoolMarkers.push({ id: school.id, marker: marker });
+      });
+    }
+
+    // --- Render Sidebar List ---
+    function renderSchoolList() {
+      const listEl = document.getElementById('schools-list');
+      document.getElementById('school-count').innerText = `${schoolsData.length} Schools`;
+      listEl.innerHTML = '';
+
+      schoolsData.forEach(school => {
+        const isDanger = school.distFt < 500;
+        const card = document.createElement('div');
+        card.className = `p-2.5 rounded-lg border transition cursor-pointer hover:shadow-md flex items-center justify-between ${
+          isDanger ? 'bg-red-50/50 border-red-200 hover:border-red-300' : 'bg-white border-slate-200 hover:border-slate-300'
+        }`;
+        
+        card.onclick = () => {
+          map.flyTo([school.lat, school.lng], 15);
+          const sm = schoolMarkers.find(m => m.id === school.id);
+          if (sm) sm.marker.openPopup();
+        };
+
+        card.innerHTML = `
+          <div>
+            <div class="font-bold text-slate-800 text-xs">${school.name}</div>
+            <div class="text-[11px] text-slate-500">${school.city}</div>
+          </div>
+          <div class="text-right">
+            <span class="inline-block px-2 py-0.5 rounded font-mono font-bold text-xs ${
+              isDanger ? 'bg-red-100 text-red-700' : (school.distFt < 1000 ? 'bg-amber-100 text-amber-800' : 'bg-emerald-100 text-emerald-800')
+            }">
+              ${school.distFt} ft
+            </span>
+          </div>
+        `;
+        listEl.appendChild(card);
+      });
+    }
+
+    // --- Address Lookup Function ---
+    function searchAddress() {
+      const query = document.getElementById('address-input').value.trim();
+      const resultEl = document.getElementById('search-result');
+      if (!query) return;
+
+      let targetLat = 37.4630;
+      let targetLng = -122.1370;
+
+      const pt = turf.point([targetLng, targetLat]);
+      const line = turf.lineString(us101Coords.map(c => [c[1], c[0]]));
+      const distanceKm = turf.pointToLineDistance(pt, line, { units: 'kilometers' });
+      const distanceFt = Math.round(distanceKm * 3280.84);
+
+      if (userMarker) map.removeLayer(userMarker);
+      userMarker = L.marker([targetLat, targetLng]).addTo(map);
+      map.flyTo([targetLat, targetLng], 15);
+
+      const inBuffer = distanceFt < 500;
+
+      resultEl.classList.remove('hidden', 'bg-red-50', 'border-red-200', 'bg-emerald-50', 'border-emerald-200');
+      resultEl.classList.add(inBuffer ? 'bg-red-50' : 'bg-emerald-50');
+      resultEl.classList.add(inBuffer ? 'border-red-200' : 'border-emerald-200');
+
+      resultEl.innerHTML = `
+        <div class="font-bold text-slate-800 flex items-center justify-between">
+          <span>Location Evaluated</span>
+          <span class="font-mono text-xs px-2 py-0.5 rounded ${inBuffer ? 'bg-red-200 text-red-900' : 'bg-emerald-200 text-emerald-900'}">${distanceFt} ft from 101</span>
+        </div>
+        <p class="mt-1 text-slate-600">
+          ${inBuffer 
+            ? '⚠️ <strong>Inside 500ft High Exhaust Buffer:</strong> Elevated concentration of traffic pollution particles.' 
+            : '✅ Outside immediate 500ft freeway buffer zone.'}
+        </p>
+      `;
+    }
+
+    function resetSearch() {
+      document.getElementById('address-input').value = '';
+      document.getElementById('search-result').classList.add('hidden');
+      if (userMarker) map.removeLayer(userMarker);
+      map.setView([37.4500, -122.1200], 12);
+    }
+
+    // --- Tab Switching ---
+    function switchTab(tab) {
+      const tabRank = document.getElementById('tab-ranking');
+      const tabGuide = document.getElementById('tab-guidance');
+      const contentRank = document.getElementById('content-ranking');
+      const contentGuide = document.getElementById('content-guidance');
+
+      if (tab === 'ranking') {
+        tabRank.className = "flex-1 py-2.5 text-xs font-semibold border-b-2 border-teal-600 text-teal-700 flex items-center justify-center gap-1";
+        tabGuide.className = "flex-1 py-2.5 text-xs font-semibold border-b-2 border-transparent text-slate-500 hover:text-slate-700 flex items-center justify-center gap-1";
+        contentRank.classList.remove('hidden');
+        contentGuide.classList.add('hidden');
+      } else {
+        tabGuide.className = "flex-1 py-2.5 text-xs font-semibold border-b-2 border-teal-600 text-teal-700 flex items-center justify-center gap-1";
+        tabRank.className = "flex-1 py-2.5 text-xs font-semibold border-b-2 border-transparent text-slate-500 hover:text-slate-700 flex items-center justify-center gap-1";
+        contentGuide.classList.remove('hidden');
+        contentRank.classList.add('hidden');
+      }
+    }
+
+    // --- Language Toggle ---
+    function toggleLanguage() {
+      currentLang = currentLang === 'en' ? 'es' : 'en';
+      document.getElementById('lang-text').innerText = currentLang === 'en' ? 'Español' : 'English';
+      
+      const dict = i18n[currentLang];
+      document.getElementById('header-subtitle').innerText = dict.subtitle;
+      document.getElementById('lbl-address').innerText = dict.lblAddress;
+      document.getElementById('btn-check').innerText = dict.btnCheck;
+      document.getElementById('btn-reset').innerText = dict.btnReset;
+      document.getElementById('tab-label-ranking').innerText = dict.tabRanking;
+      document.getElementById('tab-label-guidance').innerText = dict.tabGuidance;
+      document.getElementById('ranking-subtitle').innerText = dict.rankingSubtitle;
+      document.getElementById('leg-danger').innerText = dict.legDanger;
+      document.getElementById('leg-buffer').innerText = dict.legBuffer;
+      document.getElementById('guidance-alert-title').innerText = dict.alertTitle;
+      document.getElementById('guidance-asthma-notice').innerText = dict.asthmaNotice;
+      document.getElementById('guidance-heading').innerText = dict.guidanceHeading;
+      document.getElementById('guide1-title').innerText = dict.g1Title;
+      document.getElementById('guide1-body').innerText = dict.g1Body;
+      document.getElementById('guide2-title').innerText = dict.g2Title;
+      document.getElementById('guide2-body').innerText = dict.g2Body;
+      document.getElementById('guide3-title').innerText = dict.g3Title;
+      document.getElementById('guide3-body').innerText = dict.g3Body;
+      document.getElementById('guide4-title').innerText = dict.g4Title;
+      document.getElementById('guide4-body').innerText = dict.g4Body;
+      document.getElementById('badge-title').innerText = dict.badgeTitle;
+      document.getElementById('badge-desc').innerText = dict.badgeDesc;
+    }
+
+    function toggleModal(id) {
+      const modal = document.getElementById(id);
+      modal.classList.toggle('hidden');
+    }
+
+    window.onload = initMap;
+  </script>
+</body>
+</html>
