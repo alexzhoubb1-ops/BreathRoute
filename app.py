@@ -92,8 +92,17 @@ st.title(t["title"])
 st.caption(t["subtitle"])
 
 # -----------------------------------------------------------------------------
-# 2. Load Processed Geospatial Data
+# 2. Session State & Load Processed Geospatial Data
 # -----------------------------------------------------------------------------
+if "map_center" not in st.session_state:
+    st.session_state["map_center"] = [37.4500, -122.1200]
+if "map_zoom" not in st.session_state:
+    st.session_state["map_zoom"] = 12
+if "searched_point" not in st.session_state:
+    st.session_state["searched_point"] = None
+if "searched_dist_ft" not in st.session_state:
+    st.session_state["searched_dist_ft"] = None
+
 DATA_PATH = os.path.join("data", "processed_schools_ca16.geojson")
 
 @st.cache_data
@@ -140,9 +149,6 @@ address_query = st.sidebar.text_input(
     placeholder=t["lookup_placeholder"]
 )
 
-searched_point = None
-searched_dist_ft = None
-
 if st.sidebar.button(t["btn_check"], type="primary"):
     if address_query:
         try:
@@ -150,27 +156,33 @@ if st.sidebar.button(t["btn_check"], type="primary"):
             location = geolocator.geocode(f"{address_query}, California")
             
             if location:
-                searched_point = (location.latitude, location.longitude)
+                lat, lng = location.latitude, location.longitude
+                st.session_state["searched_point"] = (lat, lng)
+                st.session_state["map_center"] = [lat, lng]
+                st.session_state["map_zoom"] = 15
                 
-                pt_gdf = gpd.GeoDataFrame(geometry=[Point(location.longitude, location.latitude)], crs="EPSG:4326")
+                pt_gdf = gpd.GeoDataFrame(geometry=[Point(lng, lat)], crs="EPSG:4326")
                 pt_proj = pt_gdf.to_crs(epsg=3310).geometry.iloc[0]
                 
-                line_geom = LineString([(lng, lat) for lat, lng in US101_COORDS])
+                line_geom = LineString([(l_lng, l_lat) for l_lat, l_lng in US101_COORDS])
                 line_gdf = gpd.GeoDataFrame(geometry=[line_geom], crs="EPSG:4326")
                 line_proj = line_gdf.to_crs(epsg=3310).geometry.iloc[0]
                 
                 dist_meters = pt_proj.distance(line_proj)
-                searched_dist_ft = round(dist_meters * 3.28084, 1)
+                st.session_state["searched_dist_ft"] = round(dist_meters * 3.28084, 1)
                 
                 st.sidebar.success(t["found_msg"])
-                if searched_dist_ft <= 500:
-                    st.sidebar.error(f"{t['in_buffer_msg']} ({searched_dist_ft} ft)")
-                else:
-                    st.sidebar.info(f"{t['out_buffer_msg']} ({searched_dist_ft} ft)")
             else:
-                st.sidebar.warning("Address not found.")
-        except Exception as e:
-            st.sidebar.error(f"Geocoding error: {e}")
+                st.sidebar.warning("Address not found. Please try adding city name.")
+        except Exception:
+            st.sidebar.error("Geocoding lookup timed out. Please try again.")
+
+if st.session_state["searched_dist_ft"] is not None:
+    dist_ft = st.session_state["searched_dist_ft"]
+    if dist_ft <= 500:
+        st.sidebar.error(f"{t['in_buffer_msg']} ({dist_ft} ft)")
+    else:
+        st.sidebar.info(f"{t['out_buffer_msg']} ({dist_ft} ft)")
 
 st.sidebar.markdown("---")
 st.sidebar.markdown(f"### {t['legend_header']}")
@@ -182,112 +194,4 @@ st.sidebar.markdown(t["legend_buffer"])
 # -----------------------------------------------------------------------------
 # 4. Main Tabs Navigation
 # -----------------------------------------------------------------------------
-tab_map, tab_rankings, tab_guidance = st.tabs([t["tab_map"], t["tab_rankings"], t["tab_guidance"]])
-
-with tab_map:
-    center_lat = searched_point[0] if searched_point else 37.4500
-    center_lng = searched_point[1] if searched_point else -122.1200
-    zoom_level = 14 if searched_point else 12
-    
-    m = folium.Map(location=[center_lat, center_lng], zoom_start=zoom_level, tiles="OpenStreetMap")
-    
-    folium.PolyLine(
-        US101_COORDS,
-        color="crimson",
-        weight=6,
-        opacity=0.9,
-        tooltip="US Highway 101"
-    ).add_to(m)
-    
-    line_geom = LineString([(lng, lat) for lat, lng in US101_COORDS])
-    line_gdf = gpd.GeoDataFrame(geometry=[line_geom], crs="EPSG:4326")
-    line_proj = line_gdf.to_crs(epsg=3310)
-    buffer_proj = line_proj.buffer(152.4)
-    buffer_wgs84 = buffer_proj.to_crs(epsg=4326)
-    
-    folium.GeoJson(
-        buffer_wgs84,
-        style_function=lambda x: {
-            "fillColor": "#f87171",
-            "color": "#ef4444",
-            "weight": 1.5,
-            "fillOpacity": 0.25,
-            "dashArray": "4, 4"
-        },
-        tooltip="500ft High-Risk Buffer Zone"
-    ).add_to(m)
-    
-    for idx, row in gdf_schools.iterrows():
-        dist_ft = row["distance_feet"]
-        color = "red" if dist_ft < 500 else ("orange" if dist_ft < 1000 else "green")
-        
-        popup_html = f"""
-        <div style="font-family: sans-serif; font-size: 12px;">
-            <b>{row['name']}</b><br>
-            <i>{row['city']}</i><br>
-            <b>Distance:</b> {dist_ft} ft<br>
-            {'<span style="color:red; font-weight:bold;">⚠️ Inside 500ft Buffer</span>' if dist_ft < 500 else ''}
-        </div>
-        """
-        
-        folium.CircleMarker(
-            location=[row.geometry.y, row.geometry.x],
-            radius=8,
-            color="white",
-            weight=1.5,
-            fill=True,
-            fill_color=color,
-            fill_opacity=0.9,
-            popup=popup_html,
-            tooltip=f"{row['name']} ({dist_ft} ft)"
-        ).add_to(m)
-        
-    if searched_point:
-        folium.Marker(
-            location=searched_point,
-            icon=folium.Icon(color="blue", icon="info-sign"),
-            popup=f"Searched Address<br>Distance: {searched_dist_ft} ft",
-            tooltip="Searched Location"
-        ).add_to(m)
-        
-    st_folium(m, width="100%", height=550)
-
-with tab_rankings:
-    display_df = gdf_schools[["name", "city", "distance_feet", "within_500ft_buffer"]].copy()
-    display_df.columns = ["School Name", "City", "Distance (ft)", "In 500ft Zone"]
-    display_df["In 500ft Zone"] = display_df["In 500ft Zone"].map(lambda x: "⚠️ High Exposure" if x else "Safe Distance")
-    
-    st.dataframe(
-        display_df,
-        use_container_width=True,
-        hide_index=True,
-        column_config={
-            "Distance (ft)": st.column_config.NumberColumn(format="%d ft"),
-        }
-    )
-
-with tab_guidance:
-    # Mandatory medical disclaimer
-    st.error(t["asthma_alert"])
-    
-    col1, col2 = st.columns(2)
-    
-    with col1:
-        st.subheader(t["g1_title"])
-        st.write(t["g1_desc"])
-        st.markdown(f"🔗 **Source:** {t['g1_link']}")
-        st.markdown("---")
-        
-        st.subheader(t["g3_title"])
-        st.write(t["g3_desc"])
-        st.markdown(f"🔗 **Source:** {t['g3_link']}")
-
-    with col2:
-        st.subheader(t["g2_title"])
-        st.write(t["g2_desc"])
-        st.markdown(f"🔗 **Source:** {t['g2_link']}")
-        st.markdown("---")
-        
-        st.subheader(t["g4_title"])
-        st.write(t["g4_desc"])
-        st.markdown(f"🔗 **Source:** {t['g4_link']}")
+tab_map, tab_rankings, tab_guidance = st.tabs([t["tab_map"],
