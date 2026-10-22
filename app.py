@@ -101,7 +101,6 @@ def load_data():
     if os.path.exists(DATA_PATH):
         gdf = gpd.read_file(DATA_PATH)
     else:
-        # Fallback dummy dataset if GeoJSON is missing
         schools_data = [
             {"name": "Costaño Community School", "city": "East Palo Alto", "lat": 37.4648, "lng": -122.1382, "distance_feet": 320.0, "within_500ft_buffer": True},
             {"name": "César Chávez Ravenswood Middle", "city": "East Palo Alto", "lat": 37.4691, "lng": -122.1325, "distance_feet": 450.0, "within_500ft_buffer": True},
@@ -268,7 +267,7 @@ with tab_rankings:
     )
 
 with tab_guidance:
-    # Medical Warning Callout (Required line)
+    # Mandatory medical disclaimer
     st.error(t["asthma_alert"])
     
     col1, col2 = st.columns(2)
