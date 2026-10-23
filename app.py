@@ -4,7 +4,9 @@ import geopandas as gpd
 import folium
 from streamlit_folium import st_folium
 from geopy.geocoders import Nominatim
-from shapely.geometry import Point, LineString
+from shapely.geometry import Point
+from shapely.ops import unary_union
+from clip_and_calculate import run_geospatial_pipeline
 
 # -----------------------------------------------------------------------------
 # 1. Page Configuration & Translations Dictionary
@@ -19,7 +21,7 @@ st.set_page_config(
 I18N = {
     "en": {
         "title": "🌬️ BreatheRoute: CA-16 Freeway Pollution Exposure Tool",
-        "subtitle": "Mapping school and household proximity to Highway 101 traffic exhaust across Palo Alto, East Palo Alto, Mountain View, and San Jose.",
+        "subtitle": "Mapping school and household proximity to CA-16 state highways with more than 100,000 vehicles per day.",
         "lookup_header": "📍 Proximity Lookup",
         "lookup_label": "Enter an address or school in CA-16:",
         "lookup_placeholder": "e.g., 1050 Myrtle St, East Palo Alto",
@@ -28,10 +30,14 @@ I18N = {
         "in_buffer_msg": "⚠️ Inside 500ft High Exhaust Buffer Zone!",
         "out_buffer_msg": "✅ Outside 500ft buffer zone.",
         "legend_header": "🔑 Map Legend",
-        "legend_red": "🔴 Red Pin: Within 500ft (High Exposure)",
-        "legend_orange": "🟠 Orange Pin: 500 - 1,000ft",
-        "legend_green": "🟢 Green Pin: > 1,000ft",
-        "legend_buffer": "🔴 Shaded Band: 500ft High-Risk Buffer Zone",
+        "legend_red": "🔴 Red Pin: ≤500 ft (within the 500-ft buffer)",
+        "legend_orange": "🟠 Orange Pin: >500–<1,000 ft",
+        "legend_yellow": "🟡 Yellow Pin: 1,000–1,640 ft (about 500 m); research indicates traffic pollution may still have effects in this range",
+        "legend_gray": "⚪ Gray Pin: >1,640 ft; beyond this range, not necessarily safe",
+        "legend_buffer": "🔴 Shaded Band: 500ft from a >100,000 AADT road",
+        "data_source": "A highway route qualifies when a Caltrans 2024 count-station section exceeds 100,000 AADT. Distances use the full matching Caltrans road lines within a 2 km buffer of CA-16; distances are measured in EPSG:3310.",
+        "prepare_data": "Preparing the Caltrans AADT road network for CA-16...",
+        "data_ready": "CA-16 high-traffic road network is ready.",
         "tab_map": "🗺️ Interactive Map",
         "tab_rankings": "🏫 School Proximity Rankings",
         "tab_guidance": "🛡️ What You Can Do (Official Guidance)",
@@ -51,7 +57,7 @@ I18N = {
     },
     "es": {
         "title": "🌬️ BreatheRoute: Exposición a la Contaminación en la CA-16",
-        "subtitle": "Mapeo de la proximidad de escuelas y hogares a los gases de escape de la Autopista 101 en Palo Alto, East Palo Alto, Mountain View y San José.",
+        "subtitle": "Mapa de escuelas y hogares cerca de carreteras estatales en CA-16 con más de 100,000 vehículos diarios.",
         "lookup_header": "📍 Búsqueda de Proximidad",
         "lookup_label": "Ingrese una dirección o escuela en CA-16:",
         "lookup_placeholder": "ej. 1050 Myrtle St, East Palo Alto",
@@ -60,10 +66,14 @@ I18N = {
         "in_buffer_msg": "⚠️ ¡Dentro de la zona de peligro de 500 pies!",
         "out_buffer_msg": "✅ Fuera de la zona de amortiguamiento de 500 pies.",
         "legend_header": "🔑 Leyenda del Mapa",
-        "legend_red": "🔴 Marcador Rojo: Dentro de 500 pies (Alta exposición)",
-        "legend_orange": "🟠 Marcador Naranja: 500 - 1,000 pies",
-        "legend_green": "🟢 Marcador Verde: > 1,000 pies",
-        "legend_buffer": "🔴 Banda Sombreada: Zona de amortiguamiento de 500 pies",
+        "legend_red": "🔴 Marcador rojo: ≤500 pies (dentro de la zona de 500 pies)",
+        "legend_orange": "🟠 Marcador naranja: >500–<1,000 pies",
+        "legend_yellow": "🟡 Marcador amarillo: 1,000–1,640 pies (aprox. 500 m); estudios indican que la contaminación del tráfico aún puede tener efectos en este rango",
+        "legend_gray": "⚪ Marcador gris: >1,640 pies; estar fuera de este rango no significa necesariamente que sea seguro",
+        "legend_buffer": "🔴 Banda sombreada: 500 pies de una carretera con >100,000 AADT",
+        "data_source": "Una ruta califica si un tramo de conteo de Caltrans 2024 supera 100,000 AADT. Las distancias usan las líneas completas de Caltrans dentro de un búfer de 2 km alrededor de CA-16; se calculan en EPSG:3310.",
+        "prepare_data": "Preparando la red de carreteras AADT de Caltrans para CA-16...",
+        "data_ready": "La red de carreteras de alto tráfico de CA-16 está lista.",
         "tab_map": "🗺️ Mapa Interactivo",
         "tab_rankings": "🏫 Clasificación de Escuelas",
         "tab_guidance": "🛡️ Qué Puede Hacer (Guía Oficial)",
@@ -103,22 +113,27 @@ if "searched_point" not in st.session_state:
 if "searched_dist_ft" not in st.session_state:
     st.session_state["searched_dist_ft"] = None
 
-DATA_PATH = os.path.join("data", "processed_schools_ca16.geojson")
+SCHOOLS_DATA_PATH = os.path.join("data", "processed_schools_ca16.geojson")
+ROADS_DATA_PATH = os.path.join("data", "qualifying_roads_ca16.geojson")
 
 @st.cache_data
 def load_data():
-    if os.path.exists(DATA_PATH):
-        gdf = gpd.read_file(DATA_PATH)
+    if os.path.exists(SCHOOLS_DATA_PATH):
+        gdf = gpd.read_file(SCHOOLS_DATA_PATH)
     else:
         schools_data = [
-            {"name": "Costaño Community School", "city": "East Palo Alto", "lat": 37.4648, "lng": -122.1382, "distance_feet": 320.0, "within_500ft_buffer": True},
-            {"name": "César Chávez Ravenswood Middle", "city": "East Palo Alto", "lat": 37.4691, "lng": -122.1325, "distance_feet": 450.0, "within_500ft_buffer": True},
-            {"name": "Los Arboles Elementary", "city": "East Palo Alto", "lat": 37.4612, "lng": -122.1350, "distance_feet": 480.0, "within_500ft_buffer": True},
+            {"name": "Costaño Community School", "city": "East Palo Alto", "lat": 37.4779788, "lng": -122.1385100},
+            {"name": "César Chávez Ravenswood Middle", "city": "East Palo Alto", "lat": 37.4733726, "lng": -122.1450348},
+            {"name": "Los Robles-Ronald McNair Academy", "city": "East Palo Alto", "lat": 37.462029, "lng": -122.130869},
             {"name": "Greendell School", "city": "Palo Alto", "lat": 37.4225, "lng": -122.1189, "distance_feet": 620.0, "within_500ft_buffer": False},
             {"name": "Stevenson Elementary", "city": "Mountain View", "lat": 37.4089, "lng": -122.0912, "distance_feet": 410.0, "within_500ft_buffer": True},
             {"name": "Duveneck Elementary", "city": "Palo Alto", "lat": 37.4521, "lng": -122.1332, "distance_feet": 890.0, "within_500ft_buffer": False},
             {"name": "Crittenden Middle School", "city": "Mountain View", "lat": 37.4124, "lng": -122.0831, "distance_feet": 1100.0, "within_500ft_buffer": False},
-            {"name": "Palo Alto High School", "city": "Palo Alto", "lat": 37.4367, "lng": -122.1564, "distance_feet": 1850.0, "within_500ft_buffer": False}
+            {"name": "Palo Alto High School", "city": "Palo Alto", "lat": 37.4367, "lng": -122.1564},
+            {"name": "San José High School", "city": "San Jose", "lat": 37.3493264, "lng": -121.8716555},
+            {"name": "Hillbrook School San José Campus", "city": "San Jose", "lat": 37.3394388, "lng": -121.8935683},
+            {"name": "Notre Dame High", "city": "San Jose", "lat": 37.3284231, "lng": -121.8826632},
+            {"name": "Washington Elementary School", "city": "San Jose", "lat": 37.3207744, "lng": -121.8822882}
         ]
         gdf = gpd.GeoDataFrame(
             schools_data,
@@ -128,15 +143,28 @@ def load_data():
     return gdf
 
 gdf_schools = load_data()
+if not os.path.exists(ROADS_DATA_PATH):
+    with st.status(t["prepare_data"], expanded=True) as data_status:
+        run_geospatial_pipeline(
+            progress_callback=lambda message: data_status.update(label=message)
+        )
+        data_status.update(label=t["data_ready"], state="complete", expanded=False)
 
-US101_COORDS = [
-    (37.4800, -122.1500),
-    (37.4650, -122.1390),
-    (37.4500, -122.1280),
-    (37.4300, -122.1100),
-    (37.4100, -122.0850),
-    (37.3900, -121.9800)
-]
+@st.cache_data
+def load_roads():
+    return gpd.read_file(ROADS_DATA_PATH)
+
+gdf_roads = load_roads()
+roads_projected = gdf_roads.to_crs(epsg=3310)
+road_geometry = unary_union(roads_projected.geometry.tolist())
+schools_projected = gdf_schools.to_crs(epsg=3310)
+schools_projected["distance_feet"] = (
+    schools_projected.geometry.distance(road_geometry) * 3.28084
+).round(1)
+schools_projected["within_500ft_buffer"] = (
+    schools_projected["distance_feet"] <= 500
+)
+gdf_schools = schools_projected.to_crs(epsg=4326)
 
 # -----------------------------------------------------------------------------
 # 3. Sidebar Proximity Lookup Controls & Legend
@@ -167,6 +195,7 @@ if st.sidebar.button(t["btn_check"], type="primary"):
                     .iloc[0]
                 )
                 dist_meters = pt_proj.distance(road_geometry)
+                st.session_state["searched_dist_ft"] = round(dist_meters * 3.28084, 1)
 
                 st.sidebar.success(t["found_msg"])
             else:
