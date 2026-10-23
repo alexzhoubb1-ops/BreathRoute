@@ -139,7 +139,7 @@ US101_COORDS = [
 ]
 
 # -----------------------------------------------------------------------------
-# 3. Sidebar Proximity Lookup Controls
+# 3. Sidebar Proximity Lookup Controls & Legend
 # -----------------------------------------------------------------------------
 st.sidebar.markdown("---")
 st.sidebar.header(t["lookup_header"])
@@ -154,23 +154,20 @@ if st.sidebar.button(t["btn_check"], type="primary"):
         try:
             geolocator = Nominatim(user_agent="breatheroute_app_v1")
             location = geolocator.geocode(f"{address_query}, California")
-            
+
             if location:
                 lat, lng = location.latitude, location.longitude
                 st.session_state["searched_point"] = (lat, lng)
                 st.session_state["map_center"] = [lat, lng]
-                st.session_state["map_zoom"] = 15
-                
-                pt_gdf = gpd.GeoDataFrame(geometry=[Point(lng, lat)], crs="EPSG:4326")
-                pt_proj = pt_gdf.to_crs(epsg=3310).geometry.iloc[0]
-                
-                line_geom = LineString([(l_lng, l_lat) for l_lat, l_lng in US101_COORDS])
-                line_gdf = gpd.GeoDataFrame(geometry=[line_geom], crs="EPSG:4326")
-                line_proj = line_gdf.to_crs(epsg=3310).geometry.iloc[0]
-                
-                dist_meters = pt_proj.distance(line_proj)
-                st.session_state["searched_dist_ft"] = round(dist_meters * 3.28084, 1)
-                
+                st.session_state["map_zoom"] = 12 if location.raw.get("addresstype") == "city" else 15
+
+                pt_proj = (
+                    gpd.GeoSeries([Point(lng, lat)], crs="EPSG:4326")
+                    .to_crs(epsg=3310)
+                    .iloc[0]
+                )
+                dist_meters = pt_proj.distance(road_geometry)
+
                 st.sidebar.success(t["found_msg"])
             else:
                 st.sidebar.warning("Address not found. Please try adding city name.")
@@ -188,10 +185,134 @@ st.sidebar.markdown("---")
 st.sidebar.markdown(f"### {t['legend_header']}")
 st.sidebar.markdown(t["legend_red"])
 st.sidebar.markdown(t["legend_orange"])
-st.sidebar.markdown(t["legend_green"])
+st.sidebar.markdown(t["legend_yellow"])
+st.sidebar.markdown(t["legend_gray"])
 st.sidebar.markdown(t["legend_buffer"])
 
 # -----------------------------------------------------------------------------
 # 4. Main Tabs Navigation
 # -----------------------------------------------------------------------------
-tab_map, tab_rankings, tab_guidance = st.tabs([t["tab_map"],
+tab_map, tab_rankings, tab_guidance = st.tabs([t["tab_map"], t["tab_rankings"], t["tab_guidance"]])
+
+with tab_map:
+    center_lat, center_lng = st.session_state["map_center"]
+    zoom_level = st.session_state["map_zoom"]
+
+    m = folium.Map(location=[center_lat, center_lng], zoom_start=zoom_level, tiles="OpenStreetMap")
+
+    folium.GeoJson(
+        gdf_roads.to_json(),
+        name="High-traffic highways",
+        style_function=lambda feature: {
+            "color": "crimson",
+            "weight": 4,
+            "opacity": 0.9,
+        },
+        tooltip=folium.GeoJsonTooltip(
+            fields=["route", "aadt"],
+            aliases=["Route:", "2024 AADT:"],
+            localize=True,
+        ),
+    ).add_to(m)
+
+    buffer_wgs84 = gpd.GeoSeries(
+        [road_geometry.buffer(152.4)], crs="EPSG:3310"
+    ).to_crs(epsg=4326)
+
+    folium.GeoJson(
+        buffer_wgs84,
+        style_function=lambda x: {
+            "fillColor": "#f87171",
+            "color": "#ef4444",
+            "weight": 1.5,
+            "fillOpacity": 0.25,
+            "dashArray": "4, 4"
+        },
+        tooltip="500ft buffer around roads above 100,000 AADT"
+    ).add_to(m)
+
+    for idx, row in gdf_schools.iterrows():
+        dist_ft = row["distance_feet"]
+        color = (
+            "red" if dist_ft <= 500
+            else "orange" if dist_ft < 1000
+            else "yellow" if dist_ft <= 1640
+            else "gray"
+        )
+
+        popup_html = f"""
+        <div style="font-family: sans-serif; font-size: 12px;">
+            <b>{row['name']}</b><br>
+            <i>{row['city']}</i><br>
+            <b>Distance:</b> {dist_ft} ft<br>
+            {'<span style="color:red; font-weight:bold;">⚠️ Inside 500ft Buffer</span>' if dist_ft <= 500 else ''}
+        </div>
+        """
+
+        folium.CircleMarker(
+            location=[row.geometry.y, row.geometry.x],
+            radius=8,
+            color="white",
+            weight=1.5,
+            fill=True,
+            fill_color=color,
+            fill_opacity=0.9,
+            popup=popup_html,
+            tooltip=f"{row['name']} ({dist_ft} ft)"
+        ).add_to(m)
+
+    if st.session_state["searched_point"]:
+        s_lat, s_lng = st.session_state["searched_point"]
+        s_dist = st.session_state["searched_dist_ft"]
+        folium.Marker(
+            location=[s_lat, s_lng],
+            icon=folium.Icon(color="blue", icon="info-sign"),
+            popup=f"Searched Address<br>Distance: {s_dist} ft",
+            tooltip="Searched Location"
+        ).add_to(m)
+
+    st.caption(t["data_source"])
+    st_folium(m, width="100%", height=550)
+
+with tab_rankings:
+    display_df = gdf_schools.sort_values("distance_feet")[
+        ["name", "city", "distance_feet", "within_500ft_buffer"]
+    ].copy()
+    display_df.columns = ["School Name", "City", "Distance (ft)", "In 500ft Zone"]
+    display_df["In 500ft Zone"] = display_df["In 500ft Zone"].map(
+        lambda x: "⚠️ Within 500-ft buffer" if x else "Outside 500-ft buffer"
+    )
+
+    st.dataframe(
+        display_df,
+        use_container_width=True,
+        hide_index=True,
+        column_config={
+            "Distance (ft)": st.column_config.NumberColumn(format="%d ft"),
+        }
+    )
+
+with tab_guidance:
+    st.error(t["asthma_alert"])
+
+    col1, col2 = st.columns(2)
+
+    with col1:
+        st.subheader(t["g1_title"])
+        st.write(t["g1_desc"])
+        st.markdown(f"🔗 **Source:** {t['g1_link']}")
+        st.markdown("---")
+
+        st.subheader(t["g3_title"])
+        st.write(t["g3_desc"])
+        st.markdown(f"🔗 **Source:** {t['g3_link']}")
+
+    with col2:
+        st.subheader(t["g2_title"])
+        st.write(t["g2_desc"])
+        st.markdown(f"🔗 **Source:** {t['g2_link']}")
+        st.markdown("---")
+
+        st.subheader(t["g4_title"])
+        st.write(t["g4_desc"])
+        st.markdown(f"🔗 **Source:** {t['g4_link']}")
