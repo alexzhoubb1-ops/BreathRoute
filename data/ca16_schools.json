@@ -1,0 +1,1061 @@
+{
+  "source": "California public schools dataset, Congressional District 16 filter",
+  "schools": [
+    {
+      "name": "ACE Esperanza Middle",
+      "city": "San Jose",
+      "lat": 37.32723995,
+      "lng": -121.84575608
+    },
+    {
+      "name": "Addison Elementary",
+      "city": "Palo Alto",
+      "lat": 37.44588494,
+      "lng": -122.15085714
+    },
+    {
+      "name": "Adelante Selby Spanish Immersion",
+      "city": "Atherton",
+      "lat": 37.45800493,
+      "lng": -122.22101315
+    },
+    {
+      "name": "Almaden Elementary",
+      "city": "San Jose",
+      "lat": 37.25145994,
+      "lng": -121.88478007
+    },
+    {
+      "name": "Almond Elementary",
+      "city": "Los Altos",
+      "lat": 37.38385093,
+      "lng": -122.10142712
+    },
+    {
+      "name": "Alpha: Cornerstone Academy Preparatory",
+      "city": "San Jose",
+      "lat": 37.32477795,
+      "lng": -121.85130908
+    },
+    {
+      "name": "Alta Vista Elementary",
+      "city": "Los Gatos",
+      "lat": 37.23942993,
+      "lng": -121.94151308
+    },
+    {
+      "name": "Alta Vista High",
+      "city": "Mountain View",
+      "lat": 37.36013993,
+      "lng": -122.06370611
+    },
+    {
+      "name": "Alvin S. Hatch Elementary",
+      "city": "Half Moon Bay",
+      "lat": 37.46257592,
+      "lng": -122.43567918
+    },
+    {
+      "name": "Amy Imai Elementary",
+      "city": "Mountain View",
+      "lat": 37.37510394,
+      "lng": -122.07542212
+    },
+    {
+      "name": "Andrew P. Hill High",
+      "city": "San Jose",
+      "lat": 37.29220495,
+      "lng": -121.83031307
+    },
+    {
+      "name": "Ardis G. Egan Junior High",
+      "city": "Los Altos",
+      "lat": 37.39623493,
+      "lng": -122.11737313
+    },
+    {
+      "name": "Argonaut Elementary",
+      "city": "Saratoga",
+      "lat": 37.27700293,
+      "lng": -122.0250301
+    },
+    {
+      "name": "Bagby Elementary",
+      "city": "San Jose",
+      "lat": 37.27769294,
+      "lng": -121.92157608
+    },
+    {
+      "name": "Barron Park Elementary",
+      "city": "Palo Alto",
+      "lat": 37.41336093,
+      "lng": -122.13719613
+    },
+    {
+      "name": "Benjamin Bubb Elementary",
+      "city": "Mountain View",
+      "lat": 37.37887994,
+      "lng": -122.08251012
+    },
+    {
+      "name": "Blackford Elementary",
+      "city": "San Jose",
+      "lat": 37.29900494,
+      "lng": -121.92191309
+    },
+    {
+      "name": "Blossom Hill Elementary",
+      "city": "Los Gatos",
+      "lat": 37.23435493,
+      "lng": -121.95696308
+    },
+    {
+      "name": "Blue Hills Elementary",
+      "city": "Saratoga",
+      "lat": 37.28920493,
+      "lng": -122.0252131
+    },
+    {
+      "name": "Booksin Elementary",
+      "city": "San Jose",
+      "lat": 37.28880494,
+      "lng": -121.90641308
+    },
+    {
+      "name": "Branham High",
+      "city": "San Jose",
+      "lat": 37.25380494,
+      "lng": -121.89921308
+    },
+    {
+      "name": "Bridges Academy",
+      "city": "San Jose",
+      "lat": 37.32590495,
+      "lng": -121.84601308
+    },
+    {
+      "name": "Broadway High",
+      "city": "San Jose",
+      "lat": 37.26129394,
+      "lng": -121.88009307
+    },
+    {
+      "name": "Bullis Charter",
+      "city": "Los Altos",
+      "lat": 37.39619493,
+      "lng": -122.11485313
+    },
+    {
+      "name": "Cabrillo Elementary",
+      "city": "Pacifica",
+      "lat": 37.59786392,
+      "lng": -122.49670021
+    },
+    {
+      "name": "Campbell School of Innovation",
+      "city": "Campbell",
+      "lat": 37.28356694,
+      "lng": -121.95623509
+    },
+    {
+      "name": "Canoas Elementary",
+      "city": "San Jose",
+      "lat": 37.28446794,
+      "lng": -121.87691308
+    },
+    {
+      "name": "Canyon Oaks Youth Center",
+      "city": "Redwood City",
+      "lat": 37.47279093,
+      "lng": -122.28640416
+    },
+    {
+      "name": "Capri Elementary",
+      "city": "Campbell",
+      "lat": 37.26610493,
+      "lng": -121.96461309
+    },
+    {
+      "name": "Captain Jason M. Dahl Elementary",
+      "city": "San Jose",
+      "lat": 37.28860495,
+      "lng": -121.83971307
+    },
+    {
+      "name": "Carlton Elementary",
+      "city": "San Jose",
+      "lat": 37.24737293,
+      "lng": -121.94598609
+    },
+    {
+      "name": "Castlemont Elementary",
+      "city": "Campbell",
+      "lat": 37.30080494,
+      "lng": -121.94701309
+    },
+    {
+      "name": "Christa McAuliffe",
+      "city": "Saratoga",
+      "lat": 37.29200493,
+      "lng": -122.0107131
+    },
+    {
+      "name": "College Connection Academy",
+      "city": "San Jose",
+      "lat": 37.32040295,
+      "lng": -121.84857108
+    },
+    {
+      "name": "Corte Madera",
+      "city": "Portola Valley",
+      "lat": 37.36810593,
+      "lng": -122.21158914
+    },
+    {
+      "name": "Costaño Community School",
+      "city": "East Palo Alto",
+      "lat": 37.47807,
+      "lng": -122.13859
+    },
+    {
+      "name": "Country Lane Elementary",
+      "city": "San Jose",
+      "lat": 37.29815293,
+      "lng": -121.9915041
+    },
+    {
+      "name": "Covington Elementary",
+      "city": "Los Altos",
+      "lat": 37.37210993,
+      "lng": -122.10756212
+    },
+    {
+      "name": "Crittenden Middle",
+      "city": "Mountain View",
+      "lat": 37.41165194,
+      "lng": -122.08544512
+    },
+    {
+      "name": "Crittenden Middle School",
+      "city": "Mountain View",
+      "lat": 37.4106558,
+      "lng": -122.0854778
+    },
+    {
+      "name": "César Chávez Ravenswood Middle",
+      "city": "East Palo Alto",
+      "lat": 37.4733726,
+      "lng": -122.1450348
+    },
+    {
+      "name": "Dartmouth Middle",
+      "city": "San Jose",
+      "lat": 37.23976894,
+      "lng": -121.89771408
+    },
+    {
+      "name": "Daves Avenue Elementary",
+      "city": "Los Gatos",
+      "lat": 37.24020693,
+      "lng": -121.98128509
+    },
+    {
+      "name": "Del Mar High",
+      "city": "San Jose",
+      "lat": 37.30480494,
+      "lng": -121.92911309
+    },
+    {
+      "name": "Duveneck Elementary",
+      "city": "Palo Alto",
+      "lat": 37.44998694,
+      "lng": -122.13438214
+    },
+    {
+      "name": "Edith Landels Elementary",
+      "city": "Mountain View",
+      "lat": 37.38833694,
+      "lng": -122.07133012
+    },
+    {
+      "name": "El Carmelo Elementary",
+      "city": "Palo Alto",
+      "lat": 37.42558094,
+      "lng": -122.13042913
+    },
+    {
+      "name": "El Granada Elementary",
+      "city": "Half Moon Bay",
+      "lat": 37.49943592,
+      "lng": -122.46388019
+    },
+    {
+      "name": "Ellen Fletcher Middle",
+      "city": "Palo Alto",
+      "lat": 37.40239993,
+      "lng": -122.12618213
+    },
+    {
+      "name": "Encinal Elementary",
+      "city": "Atherton",
+      "lat": 37.46473393,
+      "lng": -122.18614815
+    },
+    {
+      "name": "Ernesto Galarza Elementary",
+      "city": "San Jose",
+      "lat": 37.30258494,
+      "lng": -121.88571008
+    },
+    {
+      "name": "Escondido Elementary",
+      "city": "Stanford",
+      "lat": 37.42061993,
+      "lng": -122.15584414
+    },
+    {
+      "name": "Fairmeadow Elementary",
+      "city": "Palo Alto",
+      "lat": 37.42252594,
+      "lng": -122.11730813
+    },
+    {
+      "name": "Fammatre Elementary",
+      "city": "San Jose",
+      "lat": 37.27144294,
+      "lng": -121.92517308
+    },
+    {
+      "name": "Farallone View Elementary",
+      "city": "Montara",
+      "lat": 37.54401392,
+      "lng": -122.5081442
+    },
+    {
+      "name": "Farnham Charter",
+      "city": "San Jose",
+      "lat": 37.26074094,
+      "lng": -121.94392208
+    },
+    {
+      "name": "Foothill Elementary",
+      "city": "Saratoga",
+      "lat": 37.26586893,
+      "lng": -122.0346631
+    },
+    {
+      "name": "Forest Hill Elementary",
+      "city": "San Jose",
+      "lat": 37.27606593,
+      "lng": -121.98250209
+    },
+    {
+      "name": "Frank S. Greene Jr. Middle",
+      "city": "Palo Alto",
+      "lat": 37.43857194,
+      "lng": -122.13477013
+    },
+    {
+      "name": "Franklin Elementary",
+      "city": "San Jose",
+      "lat": 37.30420495,
+      "lng": -121.85121308
+    },
+    {
+      "name": "Gabriela Mistral Elementary",
+      "city": "Mountain View",
+      "lat": 37.39521294,
+      "lng": -122.09398812
+    },
+    {
+      "name": "Gardner Bullis Elementary",
+      "city": "Los Altos Hills",
+      "lat": 37.38129793,
+      "lng": -122.13007413
+    },
+    {
+      "name": "George C. Payne Elementary",
+      "city": "San Jose",
+      "lat": 37.29676394,
+      "lng": -121.96734109
+    },
+    {
+      "name": "George V. LeyVa Intermediate",
+      "city": "San Jose",
+      "lat": 37.31490495,
+      "lng": -121.81241307
+    },
+    {
+      "name": "Georgina P. Blach Junior High",
+      "city": "Los Altos",
+      "lat": 37.36401093,
+      "lng": -122.08234912
+    },
+    {
+      "name": "Greendell",
+      "city": "Palo Alto",
+      "lat": 37.41584294,
+      "lng": -122.10574913
+    },
+    {
+      "name": "Greendell School",
+      "city": "Palo Alto",
+      "lat": 37.4157329,
+      "lng": -122.1062238
+    },
+    {
+      "name": "Gussie M. Baker Elementary",
+      "city": "San Jose",
+      "lat": 37.28407694,
+      "lng": -121.98576409
+    },
+    {
+      "name": "Hacienda Science/Environmental Magnet",
+      "city": "San Jose",
+      "lat": 37.26905894,
+      "lng": -121.88335408
+    },
+    {
+      "name": "Half Moon Bay High",
+      "city": "Half Moon Bay",
+      "lat": 37.47361092,
+      "lng": -122.42769718
+    },
+    {
+      "name": "Hammer Montessori at Galarza Elementary",
+      "city": "San Jose",
+      "lat": 37.30258494,
+      "lng": -121.88571008
+    },
+    {
+      "name": "Henry M. Gunn High",
+      "city": "Palo Alto",
+      "lat": 37.40056193,
+      "lng": -122.13406213
+    },
+    {
+      "name": "Herbert Hoover Elementary",
+      "city": "Palo Alto",
+      "lat": 37.41905094,
+      "lng": -122.11421113
+    },
+    {
+      "name": "Hillbrook School San José Campus",
+      "city": "San Jose",
+      "lat": 37.3394388,
+      "lng": -121.8935683
+    },
+    {
+      "name": "Hillview Middle",
+      "city": "Menlo Park",
+      "lat": 37.43988893,
+      "lng": -122.19502914
+    },
+    {
+      "name": "Ingrid B. Lacy Middle",
+      "city": "Pacifica",
+      "lat": 37.63789493,
+      "lng": -122.49195721
+    },
+    {
+      "name": "Isaac Newton Graham Middle",
+      "city": "Mountain View",
+      "lat": 37.38211493,
+      "lng": -122.08482912
+    },
+    {
+      "name": "Jane Lathrop Stanford Middle",
+      "city": "Palo Alto",
+      "lat": 37.42077994,
+      "lng": -122.11795713
+    },
+    {
+      "name": "John Muir Middle",
+      "city": "San Jose",
+      "lat": 37.26040194,
+      "lng": -121.88327108
+    },
+    {
+      "name": "Jose Antonio Vargas Elementary",
+      "city": "Mountain View",
+      "lat": 37.39326294,
+      "lng": -122.06207112
+    },
+    {
+      "name": "Juana Briones Elementary",
+      "city": "Palo Alto",
+      "lat": 37.40715493,
+      "lng": -122.12848713
+    },
+    {
+      "name": "Katherine R. Smith Elementary",
+      "city": "San Jose",
+      "lat": 37.32710495,
+      "lng": -121.82271307
+    },
+    {
+      "name": "Kings Mountain Elementary",
+      "city": "Woodside",
+      "lat": 37.42028992,
+      "lng": -122.32404416
+    },
+    {
+      "name": "KIPP Heritage Academy",
+      "city": "San Jose",
+      "lat": 37.28682994,
+      "lng": -121.83285807
+    },
+    {
+      "name": "KIPP Valiant Community Prep",
+      "city": "Menlo Park",
+      "lat": 37.46255694,
+      "lng": -122.15772614
+    },
+    {
+      "name": "La Entrada Middle",
+      "city": "Menlo Park",
+      "lat": 37.42741193,
+      "lng": -122.20170814
+    },
+    {
+      "name": "La Honda Elementary",
+      "city": "La Honda",
+      "lat": 37.32429492,
+      "lng": -122.27841114
+    },
+    {
+      "name": "Lairon College Preparatory Academy",
+      "city": "San Jose",
+      "lat": 37.28200494,
+      "lng": -121.82951307
+    },
+    {
+      "name": "Lakeside Elementary",
+      "city": "Los Gatos",
+      "lat": 37.19385392,
+      "lng": -122.01859809
+    },
+    {
+      "name": "Las Lomitas Elementary",
+      "city": "Atherton",
+      "lat": 37.43799293,
+      "lng": -122.21239315
+    },
+    {
+      "name": "Latimer",
+      "city": "San Jose",
+      "lat": 37.29176493,
+      "lng": -121.97752309
+    },
+    {
+      "name": "Laurel Elementary",
+      "city": "Atherton",
+      "lat": 37.46693294,
+      "lng": -122.17180914
+    },
+    {
+      "name": "Leigh High",
+      "city": "San Jose",
+      "lat": 37.24220494,
+      "lng": -121.92041308
+    },
+    {
+      "name": "Lexington Elementary",
+      "city": "Los Gatos",
+      "lat": 37.18004592,
+      "lng": -121.99028008
+    },
+    {
+      "name": "Lietz Elementary",
+      "city": "San Jose",
+      "lat": 37.24385894,
+      "lng": -121.90295708
+    },
+    {
+      "name": "Los Altos High",
+      "city": "Los Altos",
+      "lat": 37.38621493,
+      "lng": -122.10851612
+    },
+    {
+      "name": "Los Gatos High",
+      "city": "Los Gatos",
+      "lat": 37.22332893,
+      "lng": -121.97609209
+    },
+    {
+      "name": "Los Robles-Ronald McNair Academy",
+      "city": "East Palo Alto",
+      "lat": 37.462029,
+      "lng": -122.130869
+    },
+    {
+      "name": "Louise Van Meter Elementary",
+      "city": "Los Gatos",
+      "lat": 37.23044093,
+      "lng": -121.96644608
+    },
+    {
+      "name": "Loyola Elementary",
+      "city": "Los Altos",
+      "lat": 37.36066393,
+      "lng": -122.09214412
+    },
+    {
+      "name": "Lucille M. Nixon Elementary",
+      "city": "Stanford",
+      "lat": 37.41390893,
+      "lng": -122.15619514
+    },
+    {
+      "name": "Luis Valdez Leadership Academy",
+      "city": "San Jose",
+      "lat": 37.32040295,
+      "lng": -121.84857108
+    },
+    {
+      "name": "Manuel F. Cunha Intermediate",
+      "city": "Half Moon Bay",
+      "lat": 37.46242492,
+      "lng": -122.43192018
+    },
+    {
+      "name": "Mariano Castro Elementary",
+      "city": "Mountain View",
+      "lat": 37.39444094,
+      "lng": -122.09314712
+    },
+    {
+      "name": "Marshall Lane Elementary",
+      "city": "Saratoga",
+      "lat": 37.26260493,
+      "lng": -121.99691309
+    },
+    {
+      "name": "McKinley Elementary",
+      "city": "San Jose",
+      "lat": 37.321284,
+      "lng": -121.83984504
+    },
+    {
+      "name": "Menlo-Atherton High",
+      "city": "Atherton",
+      "lat": 37.46142693,
+      "lng": -122.17470914
+    },
+    {
+      "name": "Monroe Middle",
+      "city": "San Jose",
+      "lat": 37.30820494,
+      "lng": -121.94451309
+    },
+    {
+      "name": "Monta Loma Elementary",
+      "city": "Mountain View",
+      "lat": 37.40897794,
+      "lng": -122.09853613
+    },
+    {
+      "name": "Montclaire Elementary",
+      "city": "Los Altos",
+      "lat": 37.34280493,
+      "lng": -122.08211311
+    },
+    {
+      "name": "Moreland Middle",
+      "city": "San Jose",
+      "lat": 37.28928094,
+      "lng": -121.98420109
+    },
+    {
+      "name": "Mountain View High",
+      "city": "Mountain View",
+      "lat": 37.36026493,
+      "lng": -122.06716711
+    },
+    {
+      "name": "Noddin Elementary",
+      "city": "San Jose",
+      "lat": 37.23818794,
+      "lng": -121.91449308
+    },
+    {
+      "name": "Notre Dame High",
+      "city": "San Jose",
+      "lat": 37.3284231,
+      "lng": -121.8826632
+    },
+    {
+      "name": "O. B. Whaley Elementary",
+      "city": "San Jose",
+      "lat": 37.31550495,
+      "lng": -121.82521307
+    },
+    {
+      "name": "Oak Avenue Elementary",
+      "city": "Los Altos",
+      "lat": 37.35753393,
+      "lng": -122.07099612
+    },
+    {
+      "name": "Oak Knoll Elementary",
+      "city": "Menlo Park",
+      "lat": 37.43100093,
+      "lng": -122.19176014
+    },
+    {
+      "name": "Ocean Shore Elementary",
+      "city": "Pacifica",
+      "lat": 37.65087893,
+      "lng": -122.48968421
+    },
+    {
+      "name": "Oceana High",
+      "city": "Pacifica",
+      "lat": 37.63870493,
+      "lng": -122.48721321
+    },
+    {
+      "name": "Ohlone Elementary",
+      "city": "Palo Alto",
+      "lat": 37.43903194,
+      "lng": -122.12350913
+    },
+    {
+      "name": "Ormondale Elementary",
+      "city": "Portola Valley",
+      "lat": 37.38071493,
+      "lng": -122.21743314
+    },
+    {
+      "name": "Ortega Elementary",
+      "city": "Pacifica",
+      "lat": 37.58794692,
+      "lng": -122.4784492
+    },
+    {
+      "name": "Oster Elementary",
+      "city": "San Jose",
+      "lat": 37.25579594,
+      "lng": -121.92027408
+    },
+    {
+      "name": "Pacifica Independent Home Study",
+      "city": "Pacifica",
+      "lat": 37.58754999,
+      "lng": -122.47881697
+    },
+    {
+      "name": "Packard Children's Hospital/Stanford",
+      "city": "Palo Alto",
+      "lat": 37.43586393,
+      "lng": -122.17465114
+    },
+    {
+      "name": "Palo Alto High",
+      "city": "Palo Alto",
+      "lat": 37.43694694,
+      "lng": -122.15615314
+    },
+    {
+      "name": "Palo Alto High School",
+      "city": "Palo Alto",
+      "lat": 37.4358242,
+      "lng": -122.1553327
+    },
+    {
+      "name": "Palo Alto Middle College High",
+      "city": "Los Altos Hills",
+      "lat": 37.35808273,
+      "lng": -122.1289315
+    },
+    {
+      "name": "Palo Verde Elementary",
+      "city": "Palo Alto",
+      "lat": 37.43116494,
+      "lng": -122.11416613
+    },
+    {
+      "name": "Pescadero Elementary and Middle",
+      "city": "Pescadero",
+      "lat": 37.2562799,
+      "lng": -122.37853315
+    },
+    {
+      "name": "Pescadero High",
+      "city": "Pescadero",
+      "lat": 37.2476139,
+      "lng": -122.36459515
+    },
+    {
+      "name": "Pilarcitos Alternative High (Continuation)",
+      "city": "Half Moon Bay",
+      "lat": 37.46357792,
+      "lng": -122.43585818
+    },
+    {
+      "name": "Pioneer High",
+      "city": "San Jose",
+      "lat": 37.24687594,
+      "lng": -121.88244607
+    },
+    {
+      "name": "Price Charter Middle",
+      "city": "San Jose",
+      "lat": 37.27334594,
+      "lng": -121.92570608
+    },
+    {
+      "name": "Prospect High",
+      "city": "Saratoga",
+      "lat": 37.29170493,
+      "lng": -122.0010131
+    },
+    {
+      "name": "Raymond J. Fisher Middle",
+      "city": "Los Gatos",
+      "lat": 37.23385393,
+      "lng": -121.96732809
+    },
+    {
+      "name": "Redwood Middle",
+      "city": "Saratoga",
+      "lat": 37.26549593,
+      "lng": -122.0152941
+    },
+    {
+      "name": "Reed Elementary",
+      "city": "San Jose",
+      "lat": 37.26356894,
+      "lng": -121.89434608
+    },
+    {
+      "name": "River Glen",
+      "city": "San Jose",
+      "lat": 37.31077594,
+      "lng": -121.90149709
+    },
+    {
+      "name": "Robert F. Kennedy Elementary",
+      "city": "San Jose",
+      "lat": 37.32547995,
+      "lng": -121.85109108
+    },
+    {
+      "name": "Rocketship Mosaic Elementary",
+      "city": "San Jose",
+      "lat": 37.32915995,
+      "lng": -121.85590308
+    },
+    {
+      "name": "Rocketship Rising Stars",
+      "city": "San Jose",
+      "lat": 37.29170594,
+      "lng": -121.83365107
+    },
+    {
+      "name": "Rocketship Spark Academy",
+      "city": "San Jose",
+      "lat": 37.28838595,
+      "lng": -121.82250007
+    },
+    {
+      "name": "Rolling Hills Middle",
+      "city": "Los Gatos",
+      "lat": 37.26550493,
+      "lng": -121.98681309
+    },
+    {
+      "name": "Rosemary",
+      "city": "Campbell",
+      "lat": 37.29510494,
+      "lng": -121.95541309
+    },
+    {
+      "name": "San José High School",
+      "city": "San Jose",
+      "lat": 37.3493264,
+      "lng": -121.8716555
+    },
+    {
+      "name": "Santa Rita Elementary",
+      "city": "Los Altos",
+      "lat": 37.39386493,
+      "lng": -122.12188313
+    },
+    {
+      "name": "Santee Elementary",
+      "city": "San Jose",
+      "lat": 37.32890495,
+      "lng": -121.84671308
+    },
+    {
+      "name": "Saratoga Elementary",
+      "city": "Saratoga",
+      "lat": 37.25602793,
+      "lng": -122.0332901
+    },
+    {
+      "name": "Saratoga High",
+      "city": "Saratoga",
+      "lat": 37.26575393,
+      "lng": -122.0298231
+    },
+    {
+      "name": "Sartorette Charter",
+      "city": "San Jose",
+      "lat": 37.26058394,
+      "lng": -121.91042708
+    },
+    {
+      "name": "Schallenberger Elementary",
+      "city": "San Jose",
+      "lat": 37.27996794,
+      "lng": -121.88776008
+    },
+    {
+      "name": "Sherman Oaks Elementary",
+      "city": "San Jose",
+      "lat": 37.30980494,
+      "lng": -121.92521309
+    },
+    {
+      "name": "Shirakawa (George, Sr.) Elementary",
+      "city": "San Jose",
+      "lat": 37.31490495,
+      "lng": -121.84891308
+    },
+    {
+      "name": "Springer Elementary",
+      "city": "Mountain View",
+      "lat": 37.37168493,
+      "lng": -122.09511812
+    },
+    {
+      "name": "Steindorf STEAM K-8 Magnet",
+      "city": "San Jose",
+      "lat": 37.26650194,
+      "lng": -121.91943908
+    },
+    {
+      "name": "Stevenson Elementary",
+      "city": "Mountain View",
+      "lat": 37.40339394,
+      "lng": -122.08383012
+    },
+    {
+      "name": "Stonegate Elementary",
+      "city": "San Jose",
+      "lat": 37.30890495,
+      "lng": -121.83751308
+    },
+    {
+      "name": "Sunset Ridge Elementary",
+      "city": "Pacifica",
+      "lat": 37.65319593,
+      "lng": -122.48001121
+    },
+    {
+      "name": "Sylvandale Middle",
+      "city": "San Jose",
+      "lat": 37.28870495,
+      "lng": -121.82421307
+    },
+    {
+      "name": "Terra Nova High",
+      "city": "Pacifica",
+      "lat": 37.59520493,
+      "lng": -122.4755132
+    },
+    {
+      "name": "Theuerkauf Elementary",
+      "city": "Mountain View",
+      "lat": 37.40514594,
+      "lng": -122.08414612
+    },
+    {
+      "name": "Union Middle",
+      "city": "San Jose",
+      "lat": 37.24236193,
+      "lng": -121.93431108
+    },
+    {
+      "name": "University Preparatory Academy Charter",
+      "city": "San Jose",
+      "lat": 37.29104294,
+      "lng": -121.87395308
+    },
+    {
+      "name": "Vallemar Elementary",
+      "city": "Pacifica",
+      "lat": 37.61450593,
+      "lng": -122.48383621
+    },
+    {
+      "name": "Village",
+      "city": "Campbell",
+      "lat": 37.26440493,
+      "lng": -121.96471309
+    },
+    {
+      "name": "Walter Hays Elementary",
+      "city": "Palo Alto",
+      "lat": 37.44302494,
+      "lng": -122.14327014
+    },
+    {
+      "name": "Washington Elementary School",
+      "city": "San Jose",
+      "lat": 37.3207744,
+      "lng": -121.8822882
+    },
+    {
+      "name": "Westmont High",
+      "city": "Campbell",
+      "lat": 37.27090493,
+      "lng": -121.98581309
+    },
+    {
+      "name": "Willow Glen Elementary",
+      "city": "San Jose",
+      "lat": 37.30269394,
+      "lng": -121.89720208
+    },
+    {
+      "name": "Willow Glen High",
+      "city": "San Jose",
+      "lat": 37.29185294,
+      "lng": -121.89730508
+    },
+    {
+      "name": "Willow Glen Middle",
+      "city": "San Jose",
+      "lat": 37.28980694,
+      "lng": -121.89587508
+    },
+    {
+      "name": "Windmill Springs Elementary",
+      "city": "San Jose",
+      "lat": 37.30690495,
+      "lng": -121.82411307
+    },
+    {
+      "name": "Woodside Elementary",
+      "city": "Woodside",
+      "lat": 37.42779893,
+      "lng": -122.25919915
+    },
+    {
+      "name": "Woodside High",
+      "city": "Woodside",
+      "lat": 37.44528593,
+      "lng": -122.23053815
+    },
+    {
+      "name": "Yerba Buena High",
+      "city": "San Jose",
+      "lat": 37.32080495,
+      "lng": -121.85011308
+    }
+  ]
+}
