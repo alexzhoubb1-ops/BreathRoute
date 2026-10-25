@@ -50,6 +50,7 @@ SCHOOLS_CSV_URL = (
     "https://gis.data.ca.gov/api/download/v1/items/"
     "586424d4a1964277a2e0b73191da51bb/csv?layers=0"
 )
+SCHOOLS_DATA_PATH = os.path.join(OUTPUT_DIR, "ca16_schools.json")
 
 
 def normalize_school_name(value):
@@ -57,6 +58,14 @@ def normalize_school_name(value):
 
 
 def load_ca16_schools():
+    try:
+        with open(SCHOOLS_DATA_PATH, encoding="utf-8") as schools_file:
+            cached_schools = json.load(schools_file)["schools"]
+        if cached_schools:
+            return sorted(cached_schools, key=lambda school: school["name"].casefold())
+    except (OSError, ValueError, TypeError, KeyError):
+        pass
+
     records = []
     seen = set()
 

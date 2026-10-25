@@ -12,7 +12,7 @@ from clip_and_calculate import SCHOOLS, run_geospatial_pipeline
 # 1. Page Configuration & Translations Dictionary
 # -----------------------------------------------------------------------------
 st.set_page_config(
-    page_title="BreatheRoute | CA-16 Highway 101 Air Quality",
+    page_title="BreathRoute | CA-16 Highway 101 Air Quality",
     page_icon="🌬️",
     layout="wide"
 )
