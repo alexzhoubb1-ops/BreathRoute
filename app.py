@@ -6,7 +6,7 @@ from streamlit_folium import st_folium
 from geopy.geocoders import Nominatim
 from shapely.geometry import Point
 from shapely.ops import unary_union
-from clip_and_calculate import run_geospatial_pipeline
+from clip_and_calculate import SCHOOLS, run_geospatial_pipeline
 
 # -----------------------------------------------------------------------------
 # 1. Page Configuration & Translations Dictionary
@@ -113,34 +113,15 @@ if "searched_point" not in st.session_state:
 if "searched_dist_ft" not in st.session_state:
     st.session_state["searched_dist_ft"] = None
 
-SCHOOLS_DATA_PATH = os.path.join("data", "processed_schools_ca16.geojson")
 ROADS_DATA_PATH = os.path.join("data", "qualifying_roads_ca16.geojson")
 
 @st.cache_data
 def load_data():
-    if os.path.exists(SCHOOLS_DATA_PATH):
-        gdf = gpd.read_file(SCHOOLS_DATA_PATH)
-    else:
-        schools_data = [
-            {"name": "Costaño Community School", "city": "East Palo Alto", "lat": 37.4779788, "lng": -122.1385100},
-            {"name": "César Chávez Ravenswood Middle", "city": "East Palo Alto", "lat": 37.4733726, "lng": -122.1450348},
-            {"name": "Los Robles-Ronald McNair Academy", "city": "East Palo Alto", "lat": 37.462029, "lng": -122.130869},
-            {"name": "Greendell School", "city": "Palo Alto", "lat": 37.4225, "lng": -122.1189, "distance_feet": 620.0, "within_500ft_buffer": False},
-            {"name": "Stevenson Elementary", "city": "Mountain View", "lat": 37.4089, "lng": -122.0912, "distance_feet": 410.0, "within_500ft_buffer": True},
-            {"name": "Duveneck Elementary", "city": "Palo Alto", "lat": 37.4521, "lng": -122.1332, "distance_feet": 890.0, "within_500ft_buffer": False},
-            {"name": "Crittenden Middle School", "city": "Mountain View", "lat": 37.4124, "lng": -122.0831, "distance_feet": 1100.0, "within_500ft_buffer": False},
-            {"name": "Palo Alto High School", "city": "Palo Alto", "lat": 37.4367, "lng": -122.1564},
-            {"name": "San José High School", "city": "San Jose", "lat": 37.3493264, "lng": -121.8716555},
-            {"name": "Hillbrook School San José Campus", "city": "San Jose", "lat": 37.3394388, "lng": -121.8935683},
-            {"name": "Notre Dame High", "city": "San Jose", "lat": 37.3284231, "lng": -121.8826632},
-            {"name": "Washington Elementary School", "city": "San Jose", "lat": 37.3207744, "lng": -121.8822882}
-        ]
-        gdf = gpd.GeoDataFrame(
-            schools_data,
-            geometry=[Point(s["lng"], s["lat"]) for s in schools_data],
-            crs="EPSG:4326"
-        )
-    return gdf
+    return gpd.GeoDataFrame(
+        SCHOOLS,
+        geometry=[Point(school["lng"], school["lat"]) for school in SCHOOLS],
+        crs="EPSG:4326",
+    )
 
 gdf_schools = load_data()
 if not os.path.exists(ROADS_DATA_PATH):
@@ -228,6 +209,15 @@ with tab_map:
     zoom_level = st.session_state["map_zoom"]
 
     m = folium.Map(location=[center_lat, center_lng], zoom_start=zoom_level, tiles="OpenStreetMap")
+    if not st.session_state["searched_point"]:
+        m.fit_bounds(
+            [
+                [gdf_schools.geometry.y.min(), gdf_schools.geometry.x.min()],
+                [gdf_schools.geometry.y.max(), gdf_schools.geometry.x.max()],
+            ],
+            padding=(24, 24),
+            max_zoom=12,
+        )
 
     folium.GeoJson(
         gdf_roads.to_json(),

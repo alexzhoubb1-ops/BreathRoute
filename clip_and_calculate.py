@@ -31,14 +31,14 @@ ROADS_OUTPUT_PATH = os.path.join(OUTPUT_DIR, "qualifying_roads_ca16.geojson")
 SCHOOLS_OUTPUT_PATH = os.path.join(OUTPUT_DIR, "processed_schools_ca16.geojson")
 
 SCHOOLS = [
-    {"name": "Costaño Community School", "city": "East Palo Alto", "lat": 37.4779788, "lng": -122.1385100},
+    {"name": "Costaño Community School", "city": "East Palo Alto", "lat": 37.4780700, "lng": -122.1385900},
     {"name": "César Chávez Ravenswood Middle", "city": "East Palo Alto", "lat": 37.4733726, "lng": -122.1450348},
     {"name": "Los Robles-Ronald McNair Academy", "city": "East Palo Alto", "lat": 37.462029, "lng": -122.130869},
-    {"name": "Greendell School", "city": "Palo Alto", "lat": 37.4225, "lng": -122.1189},
-    {"name": "Stevenson Elementary", "city": "Mountain View", "lat": 37.4089, "lng": -122.0912},
-    {"name": "Duveneck Elementary", "city": "Palo Alto", "lat": 37.4521, "lng": -122.1332},
-    {"name": "Crittenden Middle School", "city": "Mountain View", "lat": 37.4124, "lng": -122.0831},
-    {"name": "Palo Alto High School", "city": "Palo Alto", "lat": 37.4367, "lng": -122.1564},
+    {"name": "Greendell School", "city": "Palo Alto", "lat": 37.4157329, "lng": -122.1062238},
+    {"name": "Stevenson Elementary", "city": "Mountain View", "lat": 37.4035542, "lng": -122.0841173},
+    {"name": "Duveneck Elementary", "city": "Palo Alto", "lat": 37.4496809, "lng": -122.1340934},
+    {"name": "Crittenden Middle School", "city": "Mountain View", "lat": 37.4106558, "lng": -122.0854778},
+    {"name": "Palo Alto High School", "city": "Palo Alto", "lat": 37.4358242, "lng": -122.1553327},
     {"name": "San José High School", "city": "San Jose", "lat": 37.3493264, "lng": -121.8716555},
     {"name": "Hillbrook School San José Campus", "city": "San Jose", "lat": 37.3394388, "lng": -121.8935683},
     {"name": "Notre Dame High", "city": "San Jose", "lat": 37.3284231, "lng": -121.8826632},
