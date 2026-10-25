@@ -20,7 +20,7 @@ st.set_page_config(
 # Bilingual dictionary for dynamic language switching
 I18N = {
     "en": {
-        "title": "🌬️ BreatheRoute: CA-16 Freeway Pollution Exposure Tool",
+        "title": "🌬️ BreathRoute: CA-16 Freeway Pollution Exposure Tool",
         "subtitle": "Mapping school and household proximity to CA-16 state highways with more than 100,000 vehicles per day.",
         "lookup_header": "📍 Proximity Lookup",
         "lookup_label": "Enter an address or school in CA-16:",
@@ -56,7 +56,7 @@ I18N = {
         "g4_link": "[US EPA Healthy School Environments Guide](https://www.epa.gov/schools)"
     },
     "es": {
-        "title": "🌬️ BreatheRoute: Exposición a la Contaminación en la CA-16",
+        "title": "🌬️ BreathRoute: Exposición a la Contaminación en la CA-16",
         "subtitle": "Mapa de escuelas y hogares cerca de carreteras estatales en CA-16 con más de 100,000 vehículos diarios.",
         "lookup_header": "📍 Búsqueda de Proximidad",
         "lookup_label": "Ingrese una dirección o escuela en CA-16:",

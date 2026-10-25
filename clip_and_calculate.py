@@ -121,7 +121,7 @@ def fetch_json(url, params=None):
     request_url = f"{url}?{urlencode(params)}" if params else url
     request = Request(
         request_url,
-        headers={"User-Agent": "BreatheRoute/1.0 (CA-16 AADT school proximity map)"},
+        headers={"User-Agent": "BreathRoute/1.0 (CA-16 AADT school proximity map)"},
     )
     for attempt in range(3):
         try:
@@ -148,7 +148,7 @@ def fetch_json(url, params=None):
 def load_ca16_boundary():
     request = Request(
         CENSUS_BOUNDARY_URL,
-        headers={"User-Agent": "BreatheRoute/1.0 (CA-16 AADT school proximity map)"},
+        headers={"User-Agent": "BreathRoute/1.0 (CA-16 AADT school proximity map)"},
     )
     try:
         with urlopen(request, timeout=90) as response:
