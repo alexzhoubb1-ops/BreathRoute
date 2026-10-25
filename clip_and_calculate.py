@@ -9,6 +9,7 @@ from urllib.parse import urlencode
 from urllib.request import Request, urlopen
 
 import geopandas as gpd
+import pandas as pd
 from shapely.geometry import Point, shape
 from shapely.ops import unary_union
 
@@ -30,7 +31,7 @@ OUTPUT_DIR = "data"
 ROADS_OUTPUT_PATH = os.path.join(OUTPUT_DIR, "qualifying_roads_ca16.geojson")
 SCHOOLS_OUTPUT_PATH = os.path.join(OUTPUT_DIR, "processed_schools_ca16.geojson")
 
-SCHOOLS = [
+FALLBACK_SCHOOLS = [
     {"name": "Costaño Community School", "city": "East Palo Alto", "lat": 37.4780700, "lng": -122.1385900},
     {"name": "César Chávez Ravenswood Middle", "city": "East Palo Alto", "lat": 37.4733726, "lng": -122.1450348},
     {"name": "Los Robles-Ronald McNair Academy", "city": "East Palo Alto", "lat": 37.462029, "lng": -122.130869},
@@ -44,6 +45,59 @@ SCHOOLS = [
     {"name": "Notre Dame High", "city": "San Jose", "lat": 37.3284231, "lng": -121.8826632},
     {"name": "Washington Elementary School", "city": "San Jose", "lat": 37.3207744, "lng": -121.8822882},
 ]
+
+SCHOOLS_CSV_URL = (
+    "https://gis.data.ca.gov/api/download/v1/items/"
+    "586424d4a1964277a2e0b73191da51bb/csv?layers=0"
+)
+
+
+def normalize_school_name(value):
+    return "".join(ch for ch in str(value).casefold() if ch.isalnum())
+
+
+def load_ca16_schools():
+    records = []
+    seen = set()
+
+    try:
+        schools_df = pd.read_csv(SCHOOLS_CSV_URL)
+        ca16 = schools_df[
+            schools_df["CongUSGeo"].astype(str).str.strip().eq("16")
+            & schools_df["Status"].fillna("").str.lower().eq("active")
+            & schools_df["Latitude"].notna()
+            & schools_df["Longitude"].notna()
+        ].copy()
+        for _, row in ca16.iterrows():
+            name = str(row.get("School Name", "")).strip()
+            city = str(row.get("City", "")).strip() or "Unknown"
+            lat = row.get("Latitude")
+            lng = row.get("Longitude")
+            if not name or pd.isna(lat) or pd.isna(lng):
+                continue
+            school = {
+                "name": name,
+                "city": city,
+                "lat": float(lat),
+                "lng": float(lng),
+            }
+            key = normalize_school_name(name)
+            if key not in seen:
+                records.append(school)
+                seen.add(key)
+    except Exception:
+        pass
+
+    for school in FALLBACK_SCHOOLS:
+        key = normalize_school_name(school["name"])
+        if key not in seen:
+            records.append(school)
+            seen.add(key)
+
+    return sorted(records, key=lambda school: school["name"].casefold())
+
+
+SCHOOLS = load_ca16_schools()
 
 ROAD_FIELDS = (
     "Route,RouteS,RteSuffix,County,PMPrefix,bPM,ePM,PMSuffix,"
