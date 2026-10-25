@@ -158,18 +158,38 @@ address_query = st.sidebar.text_input(
     placeholder=t["lookup_placeholder"]
 )
 
+def normalize_search_text(value):
+    return "".join(character for character in value.casefold() if character.isalnum())
+
+
 if st.sidebar.button(t["btn_check"], type="primary"):
     if address_query:
         try:
-            geolocator = Nominatim(user_agent="breatheroute_app_v1")
-            location = geolocator.geocode(f"{address_query}, California")
+            normalized_query = normalize_search_text(address_query)
+            school_match = next(
+                (
+                    school
+                    for school in SCHOOLS
+                    if normalize_search_text(school["name"]) in normalized_query
+                ),
+                None,
+            )
+            location = None
+            if school_match:
+                lat, lng = school_match["lat"], school_match["lng"]
+                map_zoom = 15
+            else:
+                geolocator = Nominatim(user_agent="breatheroute_app_v1")
+                location = geolocator.geocode(f"{address_query}, California")
 
             if location:
                 lat, lng = location.latitude, location.longitude
+                map_zoom = 12 if location.raw.get("addresstype") == "city" else 15
+
+            if school_match or location:
                 st.session_state["searched_point"] = (lat, lng)
                 st.session_state["map_center"] = [lat, lng]
-                st.session_state["map_zoom"] = 12 if location.raw.get("addresstype") == "city" else 15
-
+                st.session_state["map_zoom"] = map_zoom
                 pt_proj = (
                     gpd.GeoSeries([Point(lng, lat)], crs="EPSG:4326")
                     .to_crs(epsg=3310)
